@@ -1,0 +1,89 @@
+/*
+ * Copyright (c) 2024 QuadDrone Project. SPDX-License-Identifier: Apache-2.0
+ */
+
+&pinctrl {
+  i2c1_pb6_pb7: i2c1-pb6-pb7 {
+    pinmux = <STM32_PINMUX('B', 6, AF_OD)>,
+             <STM32_PINMUX('B', 7, AF_OD)>;
+    bias-pull-up;
+    drive-open-drain;
+  };
+
+  uart1_pa9_pa10: uart1-pa9-pa10 {
+    pinmux = <STM32_PINMUX('A', 9, AF7)>,
+             <STM32_PINMUX('A', 10, AF7)>;
+    bias-disable;
+  };
+
+  spi2_pb13_14_15: spi2-pb13-pb14-pb15 {
+    pinmux = <STM32_PINMUX('B', 13, AF5)>,
+             <STM32_PINMUX('B', 14, AF5)>,
+             <STM32_PINMUX('B', 15, AF5)>;
+    bias-disable;
+  };
+
+  adc1_pa0_pa6: adc1-pa0-pa6 {
+    pinmux = <STM32_PINMUX('A', 0, ANALOG)>,
+             <STM32_PINMUX('A', 1, ANALOG)>,
+             <STM32_PINMUX('A', 2, ANALOG)>,
+             <STM32_PINMUX('A', 3, ANALOG)>,
+             <STM32_PINMUX('A', 4, ANALOG)>,
+             <STM32_PINMUX('A', 5, ANALOG)>,
+             <STM32_PINMUX('A', 6, ANALOG)>;
+    bias-disable;
+    analog-enable;
+  };
+
+  adc1_pb0_pb1: adc1-pb0-pb1 {
+    pinmux = <STM32_PINMUX('B', 0, ANALOG)>,
+             <STM32_PINMUX('B', 1, ANALOG)>;
+    bias-disable;
+    analog-enable;
+  };
+
+  gpio_pc13: gpio-pc13 {
+    pinmux = <STM32_PINMUX('C', 13, GPIO)>;
+    bias-pull-up;
+    drive-push-pull;
+    output-low;
+  };
+
+  gpio_keys: gpio-keys {
+    key_left_pb0: pb0 {
+      pinmux = <STM32_PINMUX('B', 0, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+    };
+    key_right_pb1: pb1 {
+      pinmux = <STM32_PINMUX('B', 1, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+    };
+    key1_pa7: pa7 {
+      pinmux = <STM32_PINMUX('A', 7, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+    };
+    key2_pa8: pa8 {
+      pinmux = <STM32_PINMUX('A', 8, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+    };
+    ce_pb5: pb5 {
+      pinmux = <STM32_PINMUX('B', 5, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+    };
+    csn_pb12: pb12 {
+      pinmux = <STM32_PINMUX('B', 12, GPIO)>;
+      bias-pull-up;
+      drive-push-pull;
+      output-low;
+    };
+  };
+
+  default {
+    /* Default pin states can be defined here if needed */
+  };
+};
