@@ -1,0 +1,11 @@
+# Copyright (c) 2024 QuadDrone Project
+# SPDX-License-Identifier: Apache-2.0
+
+board:
+  name: quaddrone_remote
+  full_name: QuadDrone ANO Remote Controller
+  vendor: vendor
+  socs:
+    - name: stm32f1x
+    - name: stm32f103
+    - name: stm32f103x8

@@ -1,0 +1,28 @@
+# Copyright (c) 2024 QuadDrone Project
+# SPDX-License-Identifier: Apache-2.0
+
+# Kconfig for QuadDrone ANO Remote Controller
+
+if SOC_STM32F103C8
+
+config BOARD_VENDOR_QUADDRONE_REMOTE
+    bool "QuadDrone ANO Remote Controller Board"
+    depends on BOARD_VENDOR_QUADDRONE_REMOTE
+    select SOC_SERIES_STM32F1X
+    select HAS_DTS
+    default n
+    help
+      Enable support for QuadDrone ANO Remote Controller hardware based
+      on STM32F103C8T6 microcontroller.
+
+config BOARD_VENDOR_QUADDRONE_REMOTE_DEBUG
+    bool "Enable QuadDrone remote debug features"
+    depends on BOARD_VENDOR_QUADDRONE_REMOTE
+    default n
+
+config BOARD_VENDOR_QUADDRONE_REMOTE_LED
+    bool "Enable LED support for QuadDrone remote"
+    depends on BOARD_VENDOR_QUADDRONE_REMOTE
+    default y
+
+endif # SOC_STM32F103C8
