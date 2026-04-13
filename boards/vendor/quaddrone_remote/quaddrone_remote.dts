@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2024 QuadDrone Project. SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <dt-bindings/zephyr/led.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/stm32-pinctrl.h>
+#include "quaddrone_remote-pinctrl.dtsi"
+
+/ {
+	model = "QuadDrone ANO Remote Controller";
+	compatible = "vendor,quaddrone-remote";
+
+	chosen {
+		zephyr,console = &uart1;
+		zephyr,shell-uart = &uart1;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		led0 = &led0;
+	};
+
+	led0: led {
+		gpios = <&gpioa 13 GPIO_ACTIVE_LOW>;
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+		key_l: button-key-l {
+			label = "Left Button";
+			gpios = <&gpiob 10 GPIO_PULL_UP>;
+			linux,code = <0x174>;
+		};
+		key_r: button-key-r {
+			label = "Right Button";
+			gpios = <&gpiob 10 GPIO_PULL_UP>;
+			linux,code = <0x175>;
+		};
+		key1: button-key-1 {
+			label = "Key 1";
+			gpios = <&gpioa 7 GPIO_PULL_UP>;
+			linux,code = <0x174>;
+		};
+		key2: button-key-2 {
+			label = "Key 2";
+			gpios = <&gpioa 8 GPIO_PULL_UP>;
+			linux,code = <0x175>;
+		};
+	};
+
+	gpio {
+		compatible = "st,stm32f103-pinctrl";
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+};
+
+&adc1 {
+	status = "okay";
+	pinctrl-0 = <&adc1_pa0_pa6>, <&adc1_pb0_pb1>;
+	pinctrl-names = "default";
+};
+
+&i2c1 {
+	status = "okay";
+	pinctrl-0 = <&i2c1_pb6_pb7>;
+	pinctrl-names = "default";
+};
+
+&spi2 {
+	status = "okay";
+	pinctrl-0 = <&spi2_pb13_14_15>;
+	pinctrl-names = "default";
+};
+
+&uart1 {
+	status = "okay";
+	pinctrl-0 = <&uart1_pa9_pa10>;
+	pinctrl-names = "default";
+};
+
+&gpio {
+	gpio-led {
+		gpio-hog;
+		gpios = <13 GPIO_ACTIVE_LOW>;
+		output-low;
+	};
+};
