@@ -18,7 +18,7 @@ endif()
 if(CONFIG_GPIO)
   # LED configuration
   set(BOARD_LED0_PCIE 13)
-  set(BOARD_LED0_PORT gpioa)
+  set(BOARD_LED0_PORT gpioc)
   set(BOARD_LED0_GPIO_ACTIVE_LOW 1)
 endif()
 

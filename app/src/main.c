@@ -10,14 +10,10 @@
 #include <zephyr/sys/printk.h>
 
 #define LED_NODE DT_ALIAS(led0)
-#define LED DT_GPIO_LABEL(LED_NODE, gpios)
 
 #if !DT_NODE_HAS_STATUS(LED_NODE, okay)
 #error "LED node is not enabled in device tree"
 #endif
-
-#define LED_PIN DT_GPIO_PIN(LED_NODE, gpios)
-#define LED_FLAGS DT_GPIO_FLAGS(LED_NODE, gpios)
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
 
@@ -25,23 +21,20 @@ int main(void)
 {
 	int ret;
 
-	// Initialize the LED
 	if (!device_is_ready(led.port)) {
 		printk("Error: LED device %s is not ready\n", led.port->name);
-		return 0;
+		return -ENODEV;
 	}
 
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
 	if (ret != 0) {
 		printk("Error %d: failed to configure LED pin %d\n", ret, led.pin);
-		return 0;
+		return ret;
 	}
 
 	printk("QuadDrone ANO Remote Controller - LED Test\n");
 	printk("LED initialized on pin %d (%s)\n", led.pin, led.port->name);
-	printk("System clock: %d MHz\n", CONFIG_CLOCK_STM32_MHZ);
 
-	// Blink LED in a loop
 	while (1) {
 		gpio_pin_set_dt(&led, 1);
 		printk("LED ON\n");
