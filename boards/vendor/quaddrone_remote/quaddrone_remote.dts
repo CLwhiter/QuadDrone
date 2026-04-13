@@ -12,6 +12,35 @@
 	model = "QuadDrone ANO Remote Controller";
 	compatible = "vendor,quaddrone-remote";
 
+	/* 72MHz clock configuration */
+	clocks {
+		compatible = "st,stm32f103-rcc";
+		status = "okay";
+
+		clocks {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0>;
+
+			clk_hse: hse {
+				#clock-cells = <0>;
+				compatible = "fixed-clock";
+				clock-frequency = <8000000>;
+			};
+
+			clk_pll: pll {
+				#clock-cells = <0>;
+				compatible = "st,stm32f103-pll-clock";
+				clocks = <&clk_hse>;
+				pll-m = <1>;
+				pll-n = <9>;
+				pll-p = <2>;
+				pll-q = <7>;
+				st,clkdiv = <3>;
+			};
+		};
+	};
+
 	chosen {
 		zephyr,console = &uart1;
 		zephyr,shell-uart = &uart1;
@@ -80,6 +109,11 @@
 	status = "okay";
 	pinctrl-0 = <&uart1_pa9_pa10>;
 	pinctrl-names = "default";
+};
+
+&pll {
+	clocks = <&clk_pll>;
+	status = "okay";
 };
 
 &gpio {

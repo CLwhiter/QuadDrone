@@ -9,6 +9,22 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(app LANGUAGES C)
 
+# Add QuadDrone ANO Remote Controller board support
+set(BOARD_DIR ${APPLICATION_SOURCE}/boards)
+
+# Zephyr board discovery
+include_guard(GLOBAL)
+if(NOT ZephyrBoard_FOUND)
+  if(EXISTS ${BOARD_DIR}/vendor/${BOARD}/board.yml)
+    # Board defined in QuadDrone/boards/vendor/
+    set(ZephyrBoard_ROOT ${BOARD_DIR})
+  elseif(EXISTS ${ZEPHYR_BASE}/boards/${BOARD}/board.yml)
+    # Standard Zephyr board
+    set(ZephyrBoard_ROOT ${ZEPHYR_BASE}/boards)
+  endif()
+  find_package(ZephyrBoard QUIET)
+endif()
+
 target_sources(app PRIVATE src/main.c)
 
 # The code below locates the git index file for this repository and adds it as a dependency for
