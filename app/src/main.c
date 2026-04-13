@@ -1,80 +1,56 @@
 /*
- * Copyright (c) 2021 Nordic Semiconductor ASA
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024 QuadDrone Project. SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/drivers/sensor.h>
-#include <zephyr/logging/log.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/sys/printk.h>
 
-#include <app/drivers/blink.h>
+#define LED_NODE DT_ALIAS(led0)
+#define LED DT_GPIO_LABEL(LED_NODE, gpios)
 
-#include <app_version.h>
+#if !DT_NODE_HAS_STATUS(LED_NODE, okay)
+#error "LED node is not enabled in device tree"
+#endif
 
-LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
+#define LED_PIN DT_GPIO_PIN(LED_NODE, gpios)
+#define LED_FLAGS DT_GPIO_FLAGS(LED_NODE, gpios)
 
-#define BLINK_PERIOD_MS_STEP 100U
-#define BLINK_PERIOD_MS_MAX  1000U
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
 
 int main(void)
 {
 	int ret;
-	unsigned int period_ms = BLINK_PERIOD_MS_MAX;
-	const struct device *sensor, *blink;
-	struct sensor_value last_val = { 0 }, val;
 
-	printk("Zephyr Example Application %s\n", APP_VERSION_STRING);
-
-	sensor = DEVICE_DT_GET(DT_NODELABEL(example_sensor));
-	if (!device_is_ready(sensor)) {
-		LOG_ERR("Sensor not ready");
+	// Initialize the LED
+	if (!device_is_ready(led.port)) {
+		printk("Error: LED device %s is not ready\n", led.port->name);
 		return 0;
 	}
 
-	blink = DEVICE_DT_GET(DT_NODELABEL(blink_led));
-	if (!device_is_ready(blink)) {
-		LOG_ERR("Blink LED not ready");
+	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	if (ret != 0) {
+		printk("Error %d: failed to configure LED pin %d\n", ret, led.pin);
 		return 0;
 	}
 
-	ret = blink_off(blink);
-	if (ret < 0) {
-		LOG_ERR("Could not turn off LED (%d)", ret);
-		return 0;
-	}
+	printk("QuadDrone ANO Remote Controller - LED Test\n");
+	printk("LED initialized on pin %d (%s)\n", led.pin, led.port->name);
+	printk("System clock: %d MHz\n", CONFIG_CLOCK_STM32_MHZ);
 
-	printk("Use the sensor to change LED blinking period\n");
-
+	// Blink LED in a loop
 	while (1) {
-		ret = sensor_sample_fetch(sensor);
-		if (ret < 0) {
-			LOG_ERR("Could not fetch sample (%d)", ret);
-			return 0;
-		}
+		gpio_pin_set_dt(&led, 1);
+		printk("LED ON\n");
+		k_msleep(500);
 
-		ret = sensor_channel_get(sensor, SENSOR_CHAN_PROX, &val);
-		if (ret < 0) {
-			LOG_ERR("Could not get sample (%d)", ret);
-			return 0;
-		}
-
-		if ((last_val.val1 == 0) && (val.val1 == 1)) {
-			if (period_ms == 0U) {
-				period_ms = BLINK_PERIOD_MS_MAX;
-			} else {
-				period_ms -= BLINK_PERIOD_MS_STEP;
-			}
-
-			printk("Proximity detected, setting LED period to %u ms\n",
-			       period_ms);
-			blink_set_period_ms(blink, period_ms);
-		}
-
-		last_val = val;
-
-		k_sleep(K_MSEC(100));
+		gpio_pin_set_dt(&led, 0);
+		printk("LED OFF\n");
+		k_msleep(500);
 	}
 
 	return 0;
 }
-
