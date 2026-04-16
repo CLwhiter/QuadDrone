@@ -49,7 +49,11 @@ int adc_multi_init(void)
 	/* Configure ADC sequence for multi-channel reading */
 	adc_seq.channels = 0;
 	for (int i = 0; i < ADC_NUM_CHANNELS; i++) {
-		adc_seq.channels |= adc_channels[i];
+		if (i < (sizeof(adc_channels) / sizeof(adc_channels[0]))) {
+			adc_seq.channels |= adc_channels[i];
+		} else {
+			LOG_WRN("ADC channel %d not configured", i);
+		}
 	}
 
 	adc_seq.buffer = adc_buffer;
