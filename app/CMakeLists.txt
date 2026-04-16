@@ -27,6 +27,12 @@ endif()
 
 target_sources(app PRIVATE src/main.c)
 
+# Add OLED display driver
+zephyr_library_named(ssd1306_spi)
+target_sources(ssd1306_spi PRIVATE
+    ${APP_DIR}/drivers/display/ssd1306_spi/ssd1306_spi.c
+)
+
 # The code below locates the git index file for this repository and adds it as a dependency for
 # the application VERSION file so that if the repo has a new commit added, even if no files in
 # the build have changed, the application version file will be regenerated with the new git commit
