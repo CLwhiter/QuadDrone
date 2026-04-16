@@ -1,0 +1,4 @@
+# Copyright (c) 2024 QuadDrone Project. SPDX-License-Identifier: Apache-2.0
+
+# This is not a driver but a direct API implementation
+# No Kconfig needed - uses built-in Zephyr ADC configuration
