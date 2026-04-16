@@ -75,7 +75,7 @@
 		};
 	};
 
-	&oled_spi {
+	&oled-spi {
 		compatible = "zephyr,spi-bitbang";
 		sck-gpios = <&gpiob 6 GPIO_ACTIVE_HIGH>;
 		mosi-gpios = <&gpiob 7 GPIO_ACTIVE_HIGH>;
