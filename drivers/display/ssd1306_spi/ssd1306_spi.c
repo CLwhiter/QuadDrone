@@ -18,6 +18,8 @@
 
 LOG_MODULE_REGISTER(ssd1306_spi, CONFIG_LOG_DEFAULT_LEVEL);
 
+static struct k_mutex display_mutex;
+
 /* Display buffer */
 static uint8_t display_buffer[SSD1306_BUFFER_SIZE];
 
@@ -317,12 +319,16 @@ int ssd1306_spi_init(const struct device *dev)
 {
     spi_dev = dev;
 
+    /* Initialize display mutex */
+    k_mutex_init(&display_mutex);
+
     /* Get DC and CS GPIO devices from device tree */
     dc_dev = device_get_binding(DT_GPIO_LABEL(DT_NODELABEL(oled_dc), gpios));
     cs_dev = device_get_binding(DT_GPIO_LABEL(DT_NODELABEL(oled_cs), gpios));
 
-    if (!dc_dev || !cs_dev) {
-        LOG_ERR("Failed to get GPIO devices");
+    /* Check if device tree nodes are enabled */
+    if (!device_is_ready(dc_dev) || !device_is_ready(cs_dev)) {
+        LOG_ERR("OLED GPIO devices not ready");
         return -ENODEV;
     }
 
@@ -359,6 +365,7 @@ int ssd1306_spi_putstr(int x, int y, const char *str, int size)
 
     font = size == 6 ? font_6x8 : font_8x16;
 
+    k_mutex_lock(&display_mutex, K_FOREVER);
     for (int i = 0; str[i] != '\0'; i++) {
         uint8_t c = str[i] - 0x20;  /* Convert ASCII to font index */
 
@@ -391,6 +398,7 @@ int ssd1306_spi_putstr(int x, int y, const char *str, int size)
 
     /* Write updated buffer to display */
     ssd1306_write_data(display_buffer, sizeof(display_buffer));
+    k_mutex_unlock(&display_mutex);
     return 0;
 }
 
