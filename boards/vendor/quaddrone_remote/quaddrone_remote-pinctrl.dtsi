@@ -3,11 +3,25 @@
  */
 
 &pinctrl {
-  i2c1_pb6_pb7: i2c1-pb6-pb7 {
-    pinmux = <STM32_PINMUX('B', 6, AF_OD)>,
-             <STM32_PINMUX('B', 7, AF_OD)>;
+  oled-spi-gpios: oled-spi-pb6-pb7-pb8-pb9 {
+    pinmux = <STM32_PINMUX('B', 6, AF5)>,
+             <STM32_PINMUX('B', 7, AF5)>,
+             <STM32_PINMUX('B', 8, GPIO)>,
+             <STM32_PINMUX('B', 9, GPIO)>;
+    bias-disable;
+  };
+
+  oled_dc_pb8: oled-dc-pb8 {
+    pinmux = <STM32_PINMUX('B', 8, GPIO)>;
     bias-pull-up;
-    drive-open-drain;
+    drive-push-pull;
+  };
+
+  oled_cs_pb9: oled-cs-pb9 {
+    pinmux = <STM32_PINMUX('B', 9, GPIO)>;
+    bias-pull-up;
+    drive-push-pull;
+    output-low;
   };
 
   uart1_pa9_pa10: uart1-pa9-pa10 {
