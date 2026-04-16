@@ -75,6 +75,15 @@
 		};
 	};
 
+	&oled_spi {
+		compatible = "zephyr,spi-bitbang";
+		sck-gpios = <&gpiob 6 GPIO_ACTIVE_HIGH>;
+		mosi-gpios = <&gpiob 7 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&gpiob 9 GPIO_ACTIVE_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
 	gpio {
 		compatible = "st,stm32f103-pinctrl";
 		gpio-controller;
@@ -89,9 +98,7 @@
 };
 
 &i2c1 {
-	status = "okay";
-	pinctrl-0 = <&i2c1_pb6_pb7>;
-	pinctrl-names = "default";
+	status = "disabled";
 };
 
 &spi2 {
