@@ -1,0 +1,19 @@
+# Copyright (c) 2024 QuadDrone Project. SPDX-License-Identifier: Apache-2.0
+
+menuconfig SSD1306_SPI
+	bool "SSD1306 OLED display driver (SPI)"
+	depends on SPI
+	help
+	  Enable SSD1306 OLED display driver using SPI bitbang
+
+if SSD1306_SPI
+
+config SSD1306_SPI_INIT_PRIORITY
+	int "SSD1306 driver initialization priority"
+	default KERNEL_INIT_PRIORITY_DEVICE
+
+module = SSD1306_SPI
+module-str = ssd1306_spi
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # SSD1306_SPI
