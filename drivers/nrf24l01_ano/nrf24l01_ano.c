@@ -251,6 +251,11 @@ int nrf24l01_ano_send_frame(const struct ano_frame *frame)
     if (frame_size > NRF24L01_PAYLOAD_SIZE) {
         frame_size = NRF24L01_PAYLOAD_SIZE;
     }
+    if (frame->length > ANO_DATA_MAX) {
+        LOG_WRN("ANO frame length %d exceeds maximum %d", frame->length, ANO_DATA_MAX);
+        frame->length = ANO_DATA_MAX;
+        frame_size = frame->length + 5;
+    }
     memcpy(payload, frame, frame_size);
 
     LOG_DBG("NRF24L01: Payload (%d bytes):", frame_size);
