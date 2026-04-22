@@ -46,8 +46,9 @@ void BatteryCheck(void)
     } else if (battery_voltage <= BATTERY_EMPTY_VOLTAGE) {
         battery_level_percent = 0;
     } else {
-        battery_level_percent = (uint8_t)((battery_voltage - BATTERY_EMPTY_VOLTAGE) /
-                                         (BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE) * 100);
+        float percent = (battery_voltage - BATTERY_EMPTY_VOLTAGE) /
+                       (BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE) * 100;
+        battery_level_percent = (uint8_t)((percent > 100.0f) ? 100 : (percent < 0.0f) ? 0 : percent);
     }
 }
 
