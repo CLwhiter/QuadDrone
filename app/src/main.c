@@ -66,6 +66,11 @@ static struct k_thread battery_thread_data;
 static struct k_thread nrf_tx_thread_data;
 static struct k_thread oled_thread_data;
 
+/* Thread data storage */
+static K_THREAD_DEFINE(nrf24l01_tx_thread_data, NRF_TX_THREAD_STACK_SIZE,
+                        nrf_tx_thread, NULL, NULL, NULL,
+                        NRF_TX_THREAD_PRIORITY, 0, 0);
+
 /* ADC buffer for reading values */
 static uint16_t adc_buffer[ADC_NUM_CHANNELS];
 

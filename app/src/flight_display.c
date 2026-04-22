@@ -53,7 +53,7 @@ void FlightDisplayUpdate(void)
     ssd1306_spi_putstr(32, 4, buf, 6);
 
     /* Row 3: NRF status */
-    if (nrf24l01_ano_is_ready()) {
+    if (nrf24l01_is_connected()) {
         sprintf(buf, "NRF:OK");
     } else {
         sprintf(buf, "NRF:FAIL");
