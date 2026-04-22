@@ -10,8 +10,11 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/logging/log.h>
 
 #include "app/key_scan.h"
+
+LOG_MODULE_REGISTER(key_scan, CONFIG_LOG_DEFAULT_LEVEL);
 
 /* Key status array - shared with OLED thread */
 uint8_t KeyStatus[NUM_KEYS];
@@ -37,6 +40,7 @@ void KeyCheck(void)
 {
     const struct device *dev = device_get_binding("GPIO_0");
     if (!dev) {
+        LOG_ERR("Key scan: GPIO device not available");
         return;
     }
 
