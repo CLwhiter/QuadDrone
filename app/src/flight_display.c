@@ -53,8 +53,7 @@ void FlightDisplayUpdate(void)
     ssd1306_spi_putstr(32, 4, buf, 6);
 
     /* Row 3: NRF status */
-    const struct device *nrf_dev = device_get_binding("nrf24_ce");
-    if (nrf_dev && nrf24l01_ano_is_connected()) {
+    if (nrf24l01_ano_is_ready()) {
         sprintf(buf, "NRF:OK");
     } else {
         sprintf(buf, "NRF:FAIL");
