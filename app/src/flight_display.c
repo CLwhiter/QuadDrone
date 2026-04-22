@@ -7,6 +7,7 @@
 
 #include <zephyr/device.h>
 #include <zephyr/drivers/spi.h>
+#include <zephyr/kernel.h>
 #include <drivers/display/ssd1306_spi/ssd1306_spi.h>
 #include <drivers/nrf24l01_ano/nrf24l01_ano.h>
 #include "app/rc_processor.h"
@@ -16,11 +17,17 @@
 /* Frame counter for display */
 static int frame_count = 0;
 
+/* Mutex for thread-safe display data access */
+static struct k_mutex display_data_mutex;
+
 /**
  * @brief Initialize OLED flight display
  */
 void FlightDisplayInit(void)
 {
+    /* Initialize mutex for thread-safe display data access */
+    k_mutex_init(&display_data_mutex);
+
     const struct device *dev = device_get_binding("oled_spi");
     if (!dev) {
         return;
@@ -36,20 +43,28 @@ void FlightDisplayInit(void)
 void FlightDisplayUpdate(void)
 {
     char buf[MAX_ROW_CHARS];
+    uint16_t temp_data[6];
+    float temp_voltage;
+
+    /* Copy shared data to local variables for thread safety */
+    k_mutex_lock(&display_data_mutex, K_FOREVER);
+    memcpy(temp_data, Data, sizeof(temp_data));
+    temp_voltage = battery_voltage;
+    k_mutex_unlock(&display_data_mutex);
 
     /* Clear display */
     ssd1306_spi_clear();
 
     /* Row 0: THR:xxxx  YAW:xxxx */
-    sprintf(buf, "THR:%04d  YAW:%04d", Data[RC_CHANNEL_THROTTLE], Data[RC_CHANNEL_YAW]);
+    sprintf(buf, "THR:%04d  YAW:%04d", temp_data[RC_CHANNEL_THROTTLE], temp_data[RC_CHANNEL_YAW]);
     ssd1306_spi_putstr(0, 0, buf, 6);
 
     /* Row 1: PIT:xxxx  ROL:xxxx */
-    sprintf(buf, "PIT:%04d  ROL:%04d", Data[RC_CHANNEL_PITCH], Data[RC_CHANNEL_ROLL]);
+    sprintf(buf, "PIT:%04d  ROL:%04d", temp_data[RC_CHANNEL_PITCH], temp_data[RC_CHANNEL_ROLL]);
     ssd1306_spi_putstr(0, 2, buf, 6);
 
     /* Row 2: BAT:x.xxV */
-    sprintf(buf, "BAT:%.2fV", battery_voltage);
+    sprintf(buf, "BAT:%.2fV", temp_voltage);
     ssd1306_spi_putstr(32, 4, buf, 6);
 
     /* Row 3: NRF status */
@@ -61,11 +76,11 @@ void FlightDisplayUpdate(void)
     ssd1306_spi_putstr(40, 6, buf, 6);
 
     /* Row 4: KNOB_L:xxxx */
-    sprintf(buf, "L:%04d", Data[RC_CHANNEL_KNOB_L]);
+    sprintf(buf, "L:%04d", temp_data[RC_CHANNEL_KNOB_L]);
     ssd1306_spi_putstr(0, 8, buf, 6);
 
     /* Row 5: KNOB_R:xxxx */
-    sprintf(buf, "R:%04d", Data[RC_CHANNEL_KNOB_R]);
+    sprintf(buf, "R:%04d", temp_data[RC_CHANNEL_KNOB_R]);
     ssd1306_spi_putstr(64, 8, buf, 6);
 
     /* Row 6: Frame counter */
