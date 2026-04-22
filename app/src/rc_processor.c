@@ -6,17 +6,24 @@
  */
 
 #include "app/rc_processor.h"
+#include <zephyr/kernel.h>
 
 /* Data structures (defined as extern in header) */
 float DataRaw[8] = {0};          /* Raw filtered ADC values */
 uint16_t Data[6] = {1500};      /* Processed RC channels - neutral position */
 int16_t DataTrim[6] = {0};      /* Trim offsets - v1 has no trim */
 
+/* Mutex for thread-safe DataRaw access */
+static struct k_mutex data_raw_mutex;
+
 /**
  * @brief Initialize RC data structures
  */
 void DataInit(void)
 {
+    /* Initialize mutex for thread-safe DataRaw access */
+    k_mutex_init(&data_raw_mutex);
+
     /* Initialize all DataRaw values to zero */
     for (int i = 0; i < 8; i++) {
         DataRaw[i] = 0.0f;
@@ -37,9 +44,13 @@ void DataInit(void)
  */
 void DataGet(const uint16_t *adc_buf, uint8_t len)
 {
+    /* Protect DataRaw array access with mutex for thread safety */
+    k_mutex_lock(&data_raw_mutex, K_FOREVER);
     for (int i = 0; i < len && i < 8; i++) {
-        DataRaw[i] = DataRaw[i] * 0.99f + (float)adc_buf[i] * 0.01f;
+        float temp = DataRaw[i];
+        DataRaw[i] = temp * 0.99f + (float)adc_buf[i] * 0.01f;
     }
+    k_mutex_unlock(&data_raw_mutex);
 }
 
 /**
