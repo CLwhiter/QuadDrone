@@ -13,6 +13,7 @@
 #include "app/rc_processor.h"
 #include "app/key_scan.h"
 #include "app/battery_monitor.h"
+#include "app/flight_display.h"
 
 /* ANO protocol header */
 #include "drivers/protocol_ano/protocol_ano.h"
@@ -161,6 +162,7 @@ void nrf_tx_thread(void *p1, void *p2, void *p3)
 
 void oled_thread(void *p1, void *p2, void *p3)
 {
+    FlightDisplayInit();
     LOG_INF("OLED thread started (30Hz)");
     int frame_count = 0;
 
@@ -168,33 +170,8 @@ void oled_thread(void *p1, void *p2, void *p3)
         /* Update display at 30Hz */
         k_sleep(K_MSEC(OLED_INTERVAL_MS));
 
-        /* Clear display */
-        ssd1306_spi_clear();
-
-        /* Display RC channel values */
-        char buf[32];
-
-        /* Main control channels */
-        sprintf(buf, "THR:%04d", Data[RC_CHANNEL_THROTTLE]);
-        ssd1306_spi_putstr(0, 0, buf, 6);
-
-        sprintf(buf, "YAW:%04d", Data[RC_CHANNEL_YAW]);
-        ssd1306_spi_putstr(64, 0, buf, 6);
-
-        sprintf(buf, "PIT:%04d", Data[RC_CHANNEL_PITCH]);
-        ssd1306_spi_putstr(0, 2, buf, 6);
-
-        sprintf(buf, "ROL:%04d", Data[RC_CHANNEL_ROLL]);
-        ssd1306_spi_putstr(64, 2, buf, 6);
-
-        /* Battery voltage (now calculated with voltage divider) */
-        sprintf(buf, "BAT:%1.2fV", battery_voltage);
-        ssd1306_spi_putstr(24, 4, buf, 6);
-
-        /* Frame counter */
+        FlightDisplayUpdate();
         frame_count++;
-        sprintf(buf, "F:%03d", frame_count);
-        ssd1306_spi_putstr(100, 6, buf, 6);
     }
 }
 
@@ -230,6 +207,9 @@ void main(void)
         LOG_ERR("Failed to initialize OLED display (%d)", ret);
         return;
     }
+
+    /* Initialize flight display */
+    FlightDisplayInit();
 
     /* Create all threads with proper priorities */
     k_thread_create(&adc_thread_data, adc_thread_stack,
