@@ -33,13 +33,12 @@ void DataInit(void)
  * @brief Apply 1kHz IIR low-pass filter to ADC values
  *
  * ANO RemoteV1.25 DataGet formula:
- * DataRaw[i] = DataRaw[i] * 0.99 + ADC_value * 0.01
+ * DataRaw[i] = DataRaw[i] * 0.99 + adc_buf[i] * 0.01
  */
-void DataGet(void)
+void DataGet(const uint16_t *adc_buf, uint8_t len)
 {
-    /* Apply 0.99 IIR low-pass filter to all 8 channels */
-    for (int i = 0; i < 8; i++) {
-        DataRaw[i] = DataRaw[i] * 0.99f + DataRaw[i] * 0.01f;
+    for (int i = 0; i < len && i < 8; i++) {
+        DataRaw[i] = DataRaw[i] * 0.99f + (float)adc_buf[i] * 0.01f;
     }
 }
 

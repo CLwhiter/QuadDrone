@@ -82,11 +82,8 @@ void adc_thread(void *p1, void *p2, void *p3)
         /* Read ADC values from DMA buffer */
         adc_multi_read(adc_buffer);
 
-        /* Copy to DataRaw for filtering */
-        memcpy(DataRaw, adc_buffer, sizeof(adc_buffer));
-
-        /* Apply 1kHz IIR filter */
-        DataGet();
+        /* Apply 1kHz IIR filter: blend previous DataRaw with new ADC values */
+        DataGet(adc_buffer, ADC_NUM_CHANNELS);
 
         k_sleep(K_MSEC(ADC_INTERVAL_MS));
     }

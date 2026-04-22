@@ -35,11 +35,13 @@ void DataInit(void);
  * @brief Apply 1kHz IIR low-pass filter to ADC values
  *
  * Implements ANO RemoteV1.25 DataGet formula:
- * DataRaw[i] = DataRaw[i] * 0.99 + ADC_value * 0.01
+ * DataRaw[i] = DataRaw[i] * 0.99 + adc_buf[i] * 0.01
  *
+ * @param adc_buf Raw ADC values from DMA buffer
+ * @param len     Number of ADC channels to filter
  * @note Called at 1kHz rate from ADC thread
  */
-void DataGet(void);
+void DataGet(const uint16_t *adc_buf, uint8_t len);
 
 /**
  * @brief Convert filtered ADC values to standard RC channels
