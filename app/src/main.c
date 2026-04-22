@@ -11,6 +11,13 @@
 #include "drivers/adc_multi/adc_multi.h"
 #include "drivers/display/ssd1306_spi/ssd1306_spi.h"
 
+/* ANO protocol header */
+#include "drivers/protocol_ano/protocol_ano.h"
+
+/* ANO communication headers */
+#include "drivers/uart_ano/uart_ano.h"
+#include "drivers/nrf24l01_ano/nrf24l01_ano.h"
+
 LOG_MODULE_REGISTER(main, CONFIG_LOG_DEFAULT_LEVEL);
 
 /* Thread configurations */
@@ -89,6 +96,91 @@ void oled_thread(void *p1, void *p2, void *p3)
         k_mutex_unlock(&adc_mutex);
     }
 }
+
+/* Communication test data */
+static uint8_t test_rc_data[8] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+
+/* UART ANO thread */
+static void uart_ano_thread(void *p1, void *p2, void *p3)
+{
+	/* Initialize UART ANO driver */
+	int ret = uart_ano_init("UART_1");
+	if (ret < 0) {
+		printk("UART ANO init failed: %d\n", ret);
+		return;
+	}
+
+	printk("UART ANO thread started\n");
+
+	/* Test ANO frame transmission */
+	struct ano_frame frame;
+	int counter = 0;
+
+	while (1) {
+		/* Create heartbeat frame */
+		ret = protocol_frame_build(&frame, ANO_CMD_HEARTBEAT,
+		                           (uint8_t *)&counter, sizeof(counter));
+		if (ret < 0) {
+			printk("Protocol frame build failed: %d\n", ret);
+			k_sleep(K_MSEC(1000));
+			continue;
+		}
+
+		/* Send via UART */
+		ret = uart_ano_send_frame(&frame);
+		if (ret < 0) {
+			printk("UART send failed: %d\n", ret);
+		} else {
+			printk("UART heartbeat sent (counter=%d)\n", counter);
+		}
+
+		counter++;
+		k_sleep(K_MSEC(1000)); // 1Hz heartbeat
+	}
+}
+
+/* NRF24L01 ANO thread */
+static void nrf24l01_ano_thread(void *p1, void *p2, void *p3)
+{
+	/* Initialize NRF24L01 ANO driver */
+	int ret = nrf24l01_ano_init("SPI_2", "nrf24_ce", "nrf24_csn");
+	if (ret < 0) {
+		printk("NRF24L01 ANO init failed: %d\n", ret);
+		return;
+	}
+
+	printk("NRF24L01 ANO thread started\n");
+
+	/* Test ANO frame transmission */
+	struct ano_frame frame;
+	int counter = 0;
+
+	while (1) {
+		/* Create RC data frame */
+		ret = protocol_frame_build(&frame, ANO_CMD_RC_DATA,
+		                           test_rc_data, sizeof(test_rc_data));
+		if (ret < 0) {
+			printk("Protocol frame build failed: %d\n", ret);
+			k_sleep(K_MSEC(100));
+			continue;
+		}
+
+		/* Send via NRF24L01 */
+		ret = nrf24l01_ano_send_frame(&frame);
+		if (ret < 0) {
+			printk("NRF24L01 send failed: %d\n", ret);
+		} else {
+			printk("NRF24L01 RC data sent (counter=%d)\n", counter);
+		}
+
+		counter++;
+		k_sleep(K_MSEC(100)); // 10Hz transmission
+	}
+}
+
+/* Define communication threads */
+K_THREAD_DEFINE(uart_ano_thread_id, 1024, uart_ano_thread, NULL, NULL, NULL, 6, 0, 0);
+K_THREAD_DEFINE(nrf24l01_ano_thread_id, 1024, nrf24l01_ano_thread, NULL, NULL, NULL, 6, 0, 0);
 
 void main(void)
 {
