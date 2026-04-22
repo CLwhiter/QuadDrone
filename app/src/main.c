@@ -11,6 +11,8 @@
 #include "drivers/adc_multi/adc_multi.h"
 #include "drivers/display/ssd1306_spi/ssd1306_spi.h"
 #include "app/rc_processor.h"
+#include "app/key_scan.h"
+#include "app/battery_monitor.h"
 
 /* ANO protocol header */
 #include "drivers/protocol_ano/protocol_ano.h"
@@ -44,6 +46,7 @@ LOG_MODULE_REGISTER(main, CONFIG_LOG_DEFAULT_LEVEL);
 void adc_thread(void *p1, void *p2, void *p3);
 void calc_thread(void *p1, void *p2, void *p3);
 void key_thread(void *p1, void *p2, void *p3);
+void battery_thread(void *p1, void *p2, void *p3);
 void nrf_tx_thread(void *p1, void *p2, void *p3);
 void oled_thread(void *p1, void *p2, void *p3);
 
@@ -51,12 +54,14 @@ void oled_thread(void *p1, void *p2, void *p3);
 static K_THREAD_STACK_DEFINE(adc_thread_stack, ADC_THREAD_STACK_SIZE);
 static K_THREAD_STACK_DEFINE(calc_thread_stack, CALC_THREAD_STACK_SIZE);
 static K_THREAD_STACK_DEFINE(key_thread_stack, KEY_THREAD_STACK_SIZE);
+static K_THREAD_STACK_DEFINE(battery_thread_stack, CALC_THREAD_STACK_SIZE);
 static K_THREAD_STACK_DEFINE(nrf_tx_thread_stack, NRF_TX_THREAD_STACK_SIZE);
 static K_THREAD_STACK_DEFINE(oled_thread_stack, OLED_THREAD_STACK_SIZE);
 
 static struct k_thread adc_thread_data;
 static struct k_thread calc_thread_data;
 static struct k_thread key_thread_data;
+static struct k_thread battery_thread_data;
 static struct k_thread nrf_tx_thread_data;
 static struct k_thread oled_thread_data;
 
@@ -95,13 +100,23 @@ void calc_thread(void *p1, void *p2, void *p3)
 
 void key_thread(void *p1, void *p2, void *p3)
 {
+    KeyInit();
     LOG_INF("Key thread started (100Hz)");
 
     while (1) {
-        /* Key scanning implementation will go here in Phase 4 Plan 02 */
-        /* For now, just sleep at 100Hz rate */
-
+        KeyCheck();
         k_sleep(K_MSEC(KEY_INTERVAL_MS));
+    }
+}
+
+void battery_thread(void *p1, void *p2, void *p3)
+{
+    BatteryInit();
+    LOG_INF("Battery thread started (200Hz)");
+
+    while (1) {
+        BatteryCheck();
+        k_sleep(K_MSEC(5));  /* 200Hz */
     }
 }
 
@@ -172,9 +187,9 @@ void oled_thread(void *p1, void *p2, void *p3)
         sprintf(buf, "ROL:%04d", Data[RC_CHANNEL_ROLL]);
         ssd1306_spi_putstr(64, 2, buf, 6);
 
-        /* Battery voltage (raw ADC for now) */
-        sprintf(buf, "BAT:%04d", (uint16_t)DataRaw[ADC_CHANNEL_POWER]);
-        ssd1306_spi_putstr(32, 4, buf, 6);
+        /* Battery voltage (now calculated with voltage divider) */
+        sprintf(buf, "BAT:%1.2fV", battery_voltage);
+        ssd1306_spi_putstr(24, 4, buf, 6);
 
         /* Frame counter */
         frame_count++;
@@ -191,6 +206,10 @@ void main(void)
 
     /* Initialize RC data structures */
     DataInit();
+
+    /* Initialize key and battery monitoring */
+    KeyInit();
+    BatteryInit();
 
     /* Initialize multi-channel ADC */
     ret = adc_multi_init();
@@ -227,6 +246,11 @@ void main(void)
                     KEY_THREAD_STACK_SIZE,
                     key_thread, NULL, NULL, NULL,
                     KEY_THREAD_PRIORITY, 0, K_NO_WAIT);
+
+    k_thread_create(&battery_thread_data, battery_thread_stack,
+                    CALC_THREAD_STACK_SIZE,
+                    battery_thread, NULL, NULL, NULL,
+                    CALC_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     k_thread_create(&nrf_tx_thread_data, nrf_tx_thread_stack,
                     NRF_TX_THREAD_STACK_SIZE,
