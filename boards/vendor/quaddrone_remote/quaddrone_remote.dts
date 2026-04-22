@@ -105,6 +105,16 @@
 	status = "okay";
 	pinctrl-0 = <&spi2_pb13_14_15>;
 	pinctrl-names = "default";
+
+	nrf24l01: nrf24l01@0 {
+		compatible = "vendor,nrf24l01";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		cs-gpios = <&gpiob 12 GPIO_ACTIVE_LOW>;
+		ce-gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
+		int-gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
 };
 
 &uart1 {
