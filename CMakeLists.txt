@@ -13,3 +13,8 @@ zephyr_include_directories(include)
 
 add_subdirectory(drivers)
 add_subdirectory(lib)
+
+# Add test directory
+if(CONFIG_NATIVE_SIM OR CONFIG_UNIT_TESTING)
+    subdir(tests)
+endif
