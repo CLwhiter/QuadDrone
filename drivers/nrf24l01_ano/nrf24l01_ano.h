@@ -72,6 +72,10 @@ int nrf24l01_ano_send_frame(const struct ano_frame *frame);
  */
 bool nrf24l01_ano_is_ready(void);
 
+/* Error types */
+#define NRF24L01_ERROR_SPI    1
+#define NRF24L01_ERROR_TIMEOUT 2
+
 /**
  * @brief NRF24L01 error callback
  *
