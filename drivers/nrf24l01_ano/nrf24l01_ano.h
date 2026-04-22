@@ -72,6 +72,14 @@ int nrf24l01_ano_send_frame(const struct ano_frame *frame);
  */
 bool nrf24l01_ano_is_ready(void);
 
+/**
+ * @brief Check if NRF24L01 has valid connection (ACK received recently)
+ *
+ * @return true Connected (ACK received within last 5 transmissions)
+ * @return false Not connected or no ACK received
+ */
+bool nrf24l01_is_connected(void);
+
 /* Error types */
 #define NRF24L01_ERROR_SPI    1
 #define NRF24L01_ERROR_TIMEOUT 2
