@@ -31,9 +31,17 @@ target_sources(app PRIVATE src/main.c)
 zephyr_include_directories(../drivers/adc_multi)
 zephyr_include_directories(../drivers/display/ssd1306_spi)
 
+# Include ANO communication drivers
+zephyr_include_directories(../drivers/uart_ano)
+zephyr_include_directories(../drivers/protocol_ano)
+
 # Link sensor drivers
 target_sources(app PRIVATE ../drivers/adc_multi/adc_multi.c)
 target_sources(app PRIVATE ../drivers/display/ssd1306_spi/ssd1306_spi.c)
+
+# Link ANO communication drivers
+target_sources(app PRIVATE ../drivers/uart_ano/uart_ano.c)
+target_sources(app PRIVATE ../drivers/protocol_ano/protocol_ano.c)
 
 # Add OLED display driver
 zephyr_library_named(ssd1306_spi)
