@@ -102,18 +102,27 @@
 };
 
 &spi2 {
-	status = "okay";
-	pinctrl-0 = <&spi2_pb13_14_15>;
+	pinctrl-0 = <&spi2_pb13_pb14_pb15>;
 	pinctrl-names = "default";
+	status = "okay";
+};
 
-	nrf24l01: nrf24l01@0 {
-		compatible = "vendor,nrf24l01";
-		reg = <0>;
-		spi-max-frequency = <10000000>;
-		cs-gpios = <&gpiob 12 GPIO_ACTIVE_LOW>;
-		ce-gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
-		int-gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>;
-		status = "okay";
+/* NRF24L01 CE and CSN GPIO pins */
+/ {
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		/* NRF24L01 CE pin (PB5) */
+		nrf24_ce: nrf24_ce {
+			gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
+			label = "NRF24 CE";
+		};
+
+		/* NRF24L01 CSN pin (PB12) */
+		nrf24_csn: nrf24_csn {
+			gpios = <&gpiob 12 GPIO_ACTIVE_HIGH>;
+			label = "NRF24 CSN";
+		};
 	};
 };
 

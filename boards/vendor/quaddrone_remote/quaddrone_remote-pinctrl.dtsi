@@ -97,6 +97,23 @@
     };
   };
 
+  &iomc2 {
+	gpio_a {
+		gpio0_5_pin_a: gpio0-5-pin-a {
+			gpio-resistors = <GPIO_PULL_NONE>;
+			bias-pull-up;
+			drive-open-drain;
+			slew-rate = GPIO_SLEW_RATE_SLOW;
+		};
+		gpio0_12_pin_a: gpio0-12-pin-a {
+			gpio-resistors = <GPIO_PULL_NONE>;
+			bias-pull-up;
+			drive-open-drain;
+			slew-rate = GPIO_SLEW_RATE_SLOW;
+		};
+	};
+  };
+
   default {
     /* Default pin states can be defined here if needed */
   };
