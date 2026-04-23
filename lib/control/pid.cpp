@@ -38,7 +38,9 @@ int32_t ANO_PID::get_pi(int32_t error, uint16_t dt)
 
 int32_t ANO_PID::get_p(int32_t error)
 {
-    return (int32_t)error * (int32_t)kP / 64;
+    // Use 64-bit intermediate to prevent overflow
+    int64_t result = (int64_t)error * (int64_t)kP;
+    return (int32_t)(result / 64);
 }
 
 int32_t ANO_PID::get_i(int32_t error, uint16_t dt)
@@ -85,8 +87,10 @@ int32_t ANO_PID::get_d(int32_t error, uint16_t dt)
     }
 
     // Calculate derivative with scaling factors from ANO
-    int32_t derivative = error_diff * 0xFFFF / (avg_dt / 16) / 64;
+    // Use 64-bit intermediate to prevent overflow
+    int64_t error_diff_scaled = (int64_t)error_diff * 0xFFFF;
+    int64_t derivative = error_diff_scaled / (avg_dt / 16) / 64;
 
     // Apply derivative gain
-    return derivative * (int32_t)kD / 4;
+    return (int32_t)(derivative * (int64_t)kD / 4);
 }
