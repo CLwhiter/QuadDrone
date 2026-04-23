@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <type_traits>
 #include "rotations.h"
 
 #ifdef __cplusplus
@@ -15,6 +16,7 @@ template <typename T>
 class Vector3
 {
 public:
+    static_assert(std::is_floating_point<T>::value, "Vector3 only supports floating-point types");
     T x, y, z;
 
     // Constructors
@@ -46,7 +48,10 @@ public:
     // Normalize this vector
     void normalize()
     {
-        *this /= length();
+        float len = length();
+        if (len > 0.0f) {
+            *this /= len;
+        }
     }
 
     // Set to zero vector
@@ -58,7 +63,11 @@ public:
     // Return a normalized copy
     Vector3<T> normalized() const
     {
-        return *this / length();
+        float len = length();
+        if (len > 0.0f) {
+            return *this / len;
+        }
+        return Vector3<T>(0, 0, 0);  // Return zero vector
     }
 
     // Get angle between two vectors
@@ -108,10 +117,6 @@ public:
 };
 
 // Type aliases
-typedef Vector3<int16_t>                Vector3i;
-typedef Vector3<uint16_t>               Vector3ui;
-typedef Vector3<int32_t>                Vector3l;
-typedef Vector3<uint32_t>               Vector3ul;
 typedef Vector3<float>                  Vector3f;
 typedef Vector3<double>                 Vector3d;
 
