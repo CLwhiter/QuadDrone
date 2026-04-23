@@ -8,7 +8,9 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <type_traits>
 #include <stdbool.h>
+#include <zephyr/sys/util.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +22,7 @@ extern "C" {
 template <typename T>
 class Quaternion {
 public:
+    static_assert(std::is_floating_point<T>::value, "Quaternion only supports floating-point types");
     T w, x, y, z;
 
     // Default constructor (identity quaternion)
@@ -127,11 +130,13 @@ public:
     void normalize(void)
     {
         T mag = magnitude();
-        if (mag > 0.0f) {
+        if (mag > 1e-6f) {  // Use small epsilon instead of zero
             w /= mag;
             x /= mag;
             y /= mag;
             z /= mag;
+        } else {
+            identity();  // Fallback to identity quaternion
         }
     }
 
@@ -213,10 +218,6 @@ public:
 };
 
 // Type aliases
-typedef Quaternion<int16_t>                 Quaternioni;
-typedef Quaternion<uint16_t>                Quaternionui;
-typedef Quaternion<int32_t>                 Quaternionl;
-typedef Quaternion<uint32_t>                Quaternionul;
 typedef Quaternion<float>                   Quaternionf;
 typedef Quaternion<double>                  Quaterniond;
 
