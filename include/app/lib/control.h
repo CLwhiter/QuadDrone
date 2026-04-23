@@ -75,6 +75,32 @@ public:
     int32_t get_d(int32_t error, uint16_t dt);
 };
 
+/**
+ * @example Cascaded PID Usage
+ * @code
+ * // Create outer and inner PID controllers for cascaded control
+ * ANO_PID pid_outer;  // Outer loop (e.g., angle control)
+ * ANO_PID pid_inner;  // Inner loop (e.g., rate control)
+ *
+ * // Initialize gains
+ * pid_outer.kP = 100;  // Outer P gain
+ * pid_outer.kI = 10;   // Outer I gain
+ * pid_outer.kD = 1;    // Outer D gain
+ * pid_outer.imax = 1000;  // Outer integral limit
+ *
+ * pid_inner.kP = 50;   // Inner P gain
+ * pid_inner.kI = 5;    // Inner I gain
+ * pid_inner.kD = 0;    // Inner D gain
+ * pid_inner.imax = 500;  // Inner integral limit
+ *
+ * // Cascaded control loop
+ * int32_t angle_error = target_angle - current_angle;
+ * int32_t rate_command = pid_outer.get_pid(angle_error, dt);
+ * int32_t rate_error = rate_command - current_rate;
+ * int32_t motor_output = pid_inner.get_pid(rate_error, dt);
+ * @endcode
+ */
+
 /** @} */
 
 #endif /* APP_LIB_CONTROL_H_ */
