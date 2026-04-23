@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+config MATH
+    bool "Support for math library"
+    default y
+    help
+      This option enables the 'math' library for Vector3, Matrix3, and Quaternion operations
+
+config MATH_VECTOR3F_OPTIMIZATION
+    bool "Enable Vector3f optimizations"
+    depends on MATH
+    default y
+    help
+      This option enables specific optimizations for float vector operations
