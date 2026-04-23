@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+config CONTROL
+    bool "Support for control library"
+    default y
+    help
+      This option enables the 'control' library for PID controllers
+
+config CONTROL_PID_IMAX_DEFAULT
+    int "Default PID integral max"
+    depends on CONTROL
+    default 32768
+    help
+      Default maximum integral value for PID controller
