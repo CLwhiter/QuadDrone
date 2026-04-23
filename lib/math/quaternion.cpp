@@ -56,16 +56,49 @@ void Quaternion<T>::from_matrix(const Matrix3<T> &m)
 
     if (trace > 0) {
         s = sqrtf(trace + 1.0f) * 2.0f;
-        w = 0.25f * s;
-        x = (m.c.y - m.b.z) / s;
-        y = (m.a.z - m.c.x) / s;
-        z = (m.b.x - m.a.y) / s;
+        if (s > 0.0f) {
+            w = 0.25f * s;
+            x = (m.c.y - m.b.z) / s;
+            y = (m.a.z - m.c.x) / s;
+            z = (m.b.x - m.a.y) / s;
+        } else {
+            identity();
+            return;
+        }
     } else if (m.a.x > m.b.y && m.a.x > m.c.z) {
         s = sqrtf(1.0f + m.a.x - m.b.y - m.c.z) * 2.0f;
-        w = (m.c.y - m.b.z) / s;
-        x = 0.25f * s;
-        y = (m.a.z + m.c.x) / s;
-        z = (m.b.x + m.a.y) / s;
+        if (s > 0.0f) {
+            w = (m.c.y - m.b.z) / s;
+            x = 0.25f * s;
+            y = (m.a.z + m.c.x) / s;
+            z = (m.b.x + m.a.y) / s;
+        } else {
+            identity();
+            return;
+        }
+    } else if (m.b.y > m.c.z) {
+        s = sqrtf(1.0f + m.b.y - m.a.x - m.c.z) * 2.0f;
+        if (s > 0.0f) {
+            w = (m.a.z - m.c.x) / s;
+            x = (m.a.z + m.c.x) / s;
+            y = 0.25f * s;
+            z = (m.b.x + m.a.y) / s;
+        } else {
+            identity();
+            return;
+        }
+    } else {
+        s = sqrtf(1.0f + m.c.z - m.a.x - m.b.y) * 2.0f;
+        if (s > 0.0f) {
+            w = (m.b.x - m.a.y) / s;
+            x = (m.b.x + m.a.y) / s;
+            y = (m.a.z + m.c.x) / s;
+            z = 0.25f * s;
+        } else {
+            identity();
+            return;
+        }
+    }
     } else if (m.b.y > m.c.z) {
         s = sqrtf(1.0f + m.b.y - m.a.x - m.c.z) * 2.0f;
         w = (m.a.z - m.c.x) / s;
@@ -224,7 +257,7 @@ Quaternion<T> Quaternion<T>::slerp(const Quaternion<T> &q, const T t) const
     }
 
     // Standard SLERP
-    T theta_0 = acosf(constrain_float(dot, -1.0f, 1.0f));
+    T theta_0 = acosf(constrain_value(dot, -1.0f, 1.0f));
     T theta = theta_0 * t;
     T sin_theta = sinf(theta);
     T sin_theta_0 = sinf(theta_0);
@@ -312,7 +345,7 @@ void Quaternion<T>::set_from_two_vectors(const Vector3<T> &v1, const Vector3<T> 
     }
 
     // Calculate rotation angle
-    T angle = acosf(constrain_float(v1_norm.dot(v2_norm), -1.0f, 1.0f));
+    T angle = acosf(constrain_value(v1_norm.dot(v2_norm), -1.0f, 1.0f));
 
     // Set quaternion from axis-angle
     T half_angle = angle * 0.5f;
@@ -343,7 +376,7 @@ template <typename T>
 T Quaternion<T>::angle_to(const Quaternion<T> &q) const
 {
     T dot = dot(q);
-    return acosf(constrain_float(dot, -1.0f, 1.0f)) * 2.0f;
+    return acosf(constrain_value(dot, -1.0f, 1.0f)) * 2.0f;
 }
 
 // Get shortest angle to another quaternion
@@ -352,9 +385,9 @@ T Quaternion<T>::shortest_angle_to(const Quaternion<T> &q) const
 {
     T dot = dot(q);
     if (dot < 0.0f) {
-        return acosf(constrain_float(-dot, -1.0f, 1.0f)) * 2.0f;
+        return acosf(constrain_value(-dot, -1.0f, 1.0f)) * 2.0f;
     }
-    return acosf(constrain_float(dot, -1.0f, 1.0f)) * 2.0f;
+    return acosf(constrain_value(dot, -1.0f, 1.0f)) * 2.0f;
 }
 
 // Normalize angle to [0, 2*PI)
