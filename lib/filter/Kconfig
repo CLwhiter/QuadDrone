@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+config FILTER
+    bool "Support for filter library"
+    default y
+    help
+      This option enables the 'filter' library for digital filters
+
+config FILTER_LPF_ORDER
+    int "Default LPF order"
+    depends on FILTER
+    default 1
+    help
+      Default order for low-pass filter (1 or 2)
