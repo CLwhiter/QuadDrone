@@ -20,6 +20,7 @@ extern "C" {
 template <typename T>
 class Matrix3 {
 public:
+    static_assert(std::is_floating_point<T>::value, "Matrix3 only supports floating-point types");
 
     // Matrix columns
     Vector3<T> a, b, c;
@@ -176,10 +177,6 @@ public:
 };
 
 // Type aliases
-typedef Matrix3<int16_t>                Matrix3i;
-typedef Matrix3<uint16_t>               Matrix3ui;
-typedef Matrix3<int32_t>                Matrix3l;
-typedef Matrix3<uint32_t>               Matrix3ul;
 typedef Matrix3<float>                  Matrix3f;
 typedef Matrix3<double>                 Matrix3d;
 
