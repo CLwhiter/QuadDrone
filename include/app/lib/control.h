@@ -25,6 +25,10 @@ public:
     // Integral max (scaled integer for EEPROM storage)
     uint32_t imax;
 
+    // Reasonable limits for gains
+    static constexpr uint16_t MAX_GAIN = 1000;
+    static constexpr uint32_t MAX_IMAX = 1000000;
+
     // Internal state for integral and previous error
     int32_t integral;
     int32_t prev_error;
@@ -73,6 +77,15 @@ public:
      * @return D output
      */
     int32_t get_d(int32_t error, uint16_t dt);
+
+    /**
+     * @brief Validate PID gains are within reasonable bounds
+     * @return true if gains are valid, false otherwise
+     */
+    bool validate_gains() const {
+        return (kP <= MAX_GAIN && kI <= MAX_GAIN && kD <= MAX_GAIN &&
+                imax <= MAX_IMAX);
+    }
 };
 
 /**
